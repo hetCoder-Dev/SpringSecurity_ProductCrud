@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation=
+"http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+ 
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context.xsd
+ 
+ http://www.springframework.org/schema/tx
+ http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<context:component-scan
+		base-package="com.spring.prod" />
+
+	<bean name="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<bean id="ds"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="com.mysql.cj.jdbc.Driver"></property>
+		<property name="url"
+			value="jdbc:mysql://localhost:3307/springprodcrud?createDatabaseIfNotExist=true"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="sushet"></property>
+	</bean>
+
+	<!-- local session factory bean -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+
+		<!-- datasource props -->
+		<property name="dataSource" ref="ds"></property>
+
+		<!-- hibernate properties -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key = "hibernate.current_session_context_class"> thread </prop>
+			</props>
+		</property>
+
+		<!-- annotated classes -->
+		<property name="annotatedClasses">
+			<list>
+				<value>
+					com.spring.prod.entity.User
+				</value>
+				<value>
+					com.spring.prod.entity.UserRole
+				</value>
+				<value>
+					com.spring.prod.entity.Product
+				</value>
+				<value>
+					com.spring.prod.entity.Purchase
+				</value>
+			</list>
+
+		</property>
+	</bean>
+
+	<bean id="userDao" class="com.spring.prod.dao.UserDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<bean id="productDao" class="com.spring.prod.dao.ProductDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<bean id="purchaseDao" class="com.spring.prod.dao.PurchaseDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<bean id="purchaseService"
+		class="com.spring.prod.service.PurchaseServiceImpl">
+		<property name="purchaseDao" ref="purchaseDao"></property>
+	</bean>
+
+	<tx:annotation-driven />
+
+	<bean
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager"
+		name="transactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+</beans>
